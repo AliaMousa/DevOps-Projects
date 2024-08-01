@@ -13,9 +13,11 @@ provider "google" {
 }
 
 resource "google_service_account" "service_account" {
-  account_id   = "service-account-id"
-  display_name = "Service Account"
+  account_id   = "alia-id"
+  display_name = "alia"
 }
+# Enable compute api
+
 
 # the first step in the task is creating vpc network 
 resource "google_compute_network" "vpc_network" {
@@ -34,6 +36,7 @@ resource "google_compute_subnetwork" "private_subnet" {
   private_ip_google_access = true
 }
 
+# Allows SSH traffic to instances with the "web" tag.
 # then we sould create the firewall rule to allow ssh protocol Targets may be all instances in the network or we can target tags
 resource "google_compute_firewall" "allow_ssh_rule" {
   name    = "allow_ssh_rule"
@@ -48,7 +51,9 @@ resource "google_compute_firewall" "allow_ssh_rule" {
     ports    = ["22"]
   }
 
-  source_tags = ["app", "db", "web"]
+  target_tags = ["app", "db", "web"]
+
+  source_ranges = "35.235.240.0/20"
 }
 # comeback to this resource again and make sure to add the ssh_key
 # then We should create 2 Instances app_instance and db_instance, all of both should have no external ip and associated with the custom private subnet.
@@ -62,9 +67,6 @@ resource "google_compute_instance" "vm_instance1" {
   boot_disk {
     initialize_params {
       image = "debian-cloud/debian-11"
-      labels = {
-        my_label = "value"
-      }
     }
   }
 
@@ -77,12 +79,18 @@ resource "google_compute_instance" "vm_instance1" {
       nat_ip = null
     }
   }
+
+# we need to add the public ssh key file rsa.pub so ansible can access this machine
+  metadata = {
+    ssh-keys = "----------------------------"
+
 # -->comeback here again
   service_account {
     # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
     email  = google_service_account.default.email
     scopes = ["cloud-platform"]
   }
+}
 }
 
 resource "google_compute_instance" "vm_instance2" {
@@ -112,8 +120,9 @@ resource "google_compute_instance" "vm_instance2" {
   }
 
   metadata = {
-    vm = "database"
+    ssh_keys = "-----------------"
   }
+
 # --> comeback here again
   service_account {
     # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
@@ -138,7 +147,6 @@ resource "google_compute_router_nat" "nat_router" {
   source_subnetwork_ip_ranges_to_nat  = "LIST_OF_SUBNETWORKS"
   enable_dynamic_port_allocation      = false
   enable_endpoint_independent_mapping = false
-  type                                = "PRIVATE"
 }
 
 # This for service account but we attach the service account for every machine during creating
@@ -193,6 +201,7 @@ resource "google_compute_url_map" "default" {
 # HTTP Proxy
 resource "google_compute_target_http_proxy" "default" {
   name   = "http-lb-proxy"
+ 
   url_map = google_compute_url_map.default.self_link
 }
 
@@ -204,5 +213,25 @@ resource "google_compute_global_forwarding_rule" "default" {
   ip_address = google_compute_address.global_address.address
 }
 
+# Enabling IAP (Identity-Aware Proxy)
+resource "google_iap_web_iam_policy" "default" {
+  web_id      = google_compute_backend_service.backend_service.id
+  member      = "user:aliaashahban@gmail.com"
+  role        = "roles/iap.tunnelResourceAccessor"
+}
 
+resource "google_iap_tunnel_instance_iam_binding" "iap_binding" {
+  project     = local.project_id
+  zone        = "us-west1-a"
+  instance    = google_compute_instance.app_instance.name
+  role        = "roles/iap.tunnelResourceAccessor"
+  members     = ["user:aliaashahban@gmail.com"]
+}
+
+# Adding the necessary IAM roles to your account
+resource "google_project_iam_member" "iap_role" {
+  project = local.project_id
+  member  = "user:aliaashahban@gmail.com"
+  role    = "roles/iap.tunnelResourceAccessor"
+}
 # review

@@ -1,0 +1,49 @@
+---
+#  tasks:
+# Step1: we need to install all the dependances 
+- name: install dependencies
+  apt:
+    name: '{{ docker_dep }}'
+    state: latest
+    update_cache: yes
+  tags: 
+    - docker
+    - docker-compose
+
+# Step2: Download the gpg key
+- name: GPG key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+  tags: docker
+
+# Step3: Add Docker Repositories
+- name: repository docker
+  apt_repository:
+    repo: deb https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+    state: present
+  tags: docker
+
+# Step4: Install docker-ce docker-ce-cli containerd.io packages
+- name: install docker
+  apt:
+    name: '{{ docker_pkg }}'
+    state: latest
+    update_cache: yes
+  tags: docker
+
+# Step5: Add user to docker group
+- name: adding users to group docker
+  user:
+    name: '{{ item }}'
+    groups: docker
+    append: yes
+    loop: '{{ docker_users }}'
+
+# Step5: Install docker-compose
+- name: Install docker-compose
+  get_url:
+    url : https://github.com/docker/compose/releases/download/1.29.2/docker-compose-Linux-x86_64
+    dest: /usr/local/bin/docker-compose
+    mode: '755'
+  tags: docker-compose
