@@ -1,0 +1,8 @@
+---
+#handlers
+#restart service Docker on ubuntu, in all cases, also issue daemon-reload to pick up config changes
+- name: dockerservice
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: docker

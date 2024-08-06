@@ -1,5 +1,16 @@
 ---
 #  tasks:
+#To check if Docker is already installed before proceeding with the installation,
+- name: check docker installation; register the resualt
+  command: "docker --version"
+  register: docker_output
+  changed_when: false
+
+- name: fail if docker already installed
+  fail:
+    msg: "Docker is already installed"
+  when: docker_output.rc == 0
+
 # Step1: we need to install all the dependances 
 - name: install dependencies
   apt:
@@ -31,6 +42,7 @@
     state: latest
     update_cache: yes
   tags: docker
+  handlers: dockerservice
 
 # Step5: Add user to docker group
 - name: adding users to group docker
@@ -40,10 +52,22 @@
     append: yes
     loop: '{{ docker_users }}'
 
+#To check if Docker Compose is already installed before proceeding with the installation,
+- name: check docker installation; register the resualt
+  command: "docker-compose --version"
+  register: docker_compose_output
+  changed_when: false
+
+- name: fail if docker already installed
+  fail:
+    msg: "Docker Compose is already installed"
+  when: docker_compose_output.rc == 0
+
+
 # Step5: Install docker-compose
 - name: Install docker-compose
   get_url:
-    url : https://github.com/docker/compose/releases/download/1.29.2/docker-compose-Linux-x86_64
+    url : "{{ docker_compose_url }}"
     dest: /usr/local/bin/docker-compose
     mode: '755'
   tags: docker-compose
