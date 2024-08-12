@@ -1,42 +1,97 @@
-/**
- * Copyright 2019 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/******************************************
-	VPC configuration
- *****************************************/
-resource "google_compute_network" "network" {
-  name                                      = var.network_name
-  auto_create_subnetworks                   = var.auto_create_subnetworks
-  routing_mode                              = var.routing_mode
-  project                                   = var.project_id
-  description                               = var.description
-  delete_default_routes_on_create           = var.delete_default_internet_gateway_routes
-  mtu                                       = var.mtu
-  enable_ula_internal_ipv6                  = var.enable_ipv6_ula
-  internal_ipv6_range                       = var.internal_ipv6_range
-  network_firewall_policy_enforcement_order = var.network_firewall_policy_enforcement_order
+variable "project_id" {
+  description = "The ID of the project where this VPC will be created"
+  type        = string
 }
 
-/******************************************
-	Shared VPC
- *****************************************/
-resource "google_compute_shared_vpc_host_project" "shared_vpc_host" {
-  provider = google-beta
-
-  count      = var.shared_vpc_host ? 1 : 0
-  project    = var.project_id
-  depends_on = [google_compute_network.network]
+variable "network_name" {
+  description = "The name of the network being created"
+  type        = string
 }
+
+variable "auto_create_subnetworks" {
+  type        = bool
+  description = "When set to true, the network is created in 'auto subnet mode' and it will create a subnet for each region automatically across the 10.128.0.0/9 address range. When set to false, the network is created in 'custom subnet mode' so the user can explicitly connect subnetwork resources."
+  default     = false
+}
+
+variable "subnet_name" {
+  type        = string
+  description = "The name of the subnetwork being created"
+
+}
+
+variable "subnet_region" {
+  type    = string
+  default = "us-central1"
+
+}
+variable "subnet_private_access" {
+  type    = bool
+  default = true
+}
+
+variable "ip_cidr_range" {
+  type        = string
+  description = " subnet range"
+  default     = "10.10.0.0/28"
+}
+
+variable "purpose" {
+  type    = string
+  default = "PRIVATE_NAT"
+}
+
+variable "rule_name" {
+  type        = string
+  description = "rule name"
+  default     = "allow_ssh"
+}
+
+variable "source_ranges" {
+  type    = string
+  default = "35.235.240.0/20"
+
+}
+
+variable "target_tags" {
+  type = list(object({
+    protocol = string
+    ports    = optional(list(string))
+  }))
+  default = []
+}
+
+variable "rules" {
+  type = list(object({
+    protocol = string
+    ports    = optional(list(string))
+  }))
+  default = []
+}
+
+variable "router_name" {
+  type        = string
+  default     = "router_app"
+  description = "Router"
+
+}
+
+variable "router_nat" {
+  type    = string
+  default = "app_nat"
+
+}
+
+variable "port_allocation" {
+  type    = bool
+  default = false
+}
+
+variable "endpoint_mapping" {
+  type    = bool
+  default = false
+
+}
+
+
+

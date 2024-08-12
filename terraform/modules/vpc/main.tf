@@ -1,42 +1,59 @@
-/**
- * Copyright 2019 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 /******************************************
 	VPC configuration
  *****************************************/
 resource "google_compute_network" "network" {
-  name                                      = var.network_name
-  auto_create_subnetworks                   = var.auto_create_subnetworks
-  routing_mode                              = var.routing_mode
-  project                                   = var.project_id
-  description                               = var.description
-  delete_default_routes_on_create           = var.delete_default_internet_gateway_routes
-  mtu                                       = var.mtu
-  enable_ula_internal_ipv6                  = var.enable_ipv6_ula
-  internal_ipv6_range                       = var.internal_ipv6_range
-  network_firewall_policy_enforcement_order = var.network_firewall_policy_enforcement_order
+  name                    = var.network_name
+  auto_create_subnetworks = var.auto_create_subnetworks
+  project                 = var.project_id
 }
 
-/******************************************
-	Shared VPC
- *****************************************/
-resource "google_compute_shared_vpc_host_project" "shared_vpc_host" {
-  provider = google-beta
+resource "google_compute_subnetwork" "subnetwork" {
 
-  count      = var.shared_vpc_host ? 1 : 0
-  project    = var.project_id
-  depends_on = [google_compute_network.network]
+  name                     = var.subnet_name
+  ip_cidr_range            = var.subnet_ip
+  region                   = var.subnet_region
+  private_ip_google_access = var.private_ip_google_access
+  network                  = var.network_name
+  project                  = var.project_id
+  purpose                  = var.purpose
+
+}
+
+resource "google_compute_firewall" "rules" {
+  name        = var.rule_name
+  description = var.description
+
+  network       = var.network_name
+  project       = var.project_id
+  source_ranges = var.source_ranges
+  #source_tags             = each.value.source_tags
+  #source_service_accounts = each.value.source_service_accounts
+  target_tags = var.target_tags
+
+  dynamic "allow" {
+    #for_each = lookup(each.value, "allow", [])
+    content {
+      protocol = ssh
+      ports    = 22
+    }
+  }
+}
+
+resource "google_compute_router" "router" {
+
+
+  project = var.project_id
+  network = var.network_name
+  name    = var.router_name
+
+}
+
+resource "google_compute_router_nat" "nat_router" {
+  name   = var.router_nat
+  router = google_compute_router.router.name
+  region = local.region
+  #source_subnetwork_ip_ranges_to_nat  = "LIST_OF_SUBNETWORKS"
+  enable_dynamic_port_allocation      = var.port_allocation
+  enable_endpoint_independent_mapping = var.endpoint_mapping
 }

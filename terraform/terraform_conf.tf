@@ -214,7 +214,7 @@ resource "google_compute_global_forwarding_rule" "default" {
 }
 
 # Enabling IAP (Identity-Aware Proxy)
-resource "google_iap_web_iam_policy" "default" {
+/*resource "google_iap_web_iam_policy" "default" {
   web_id      = google_compute_backend_service.backend_service.id
   member      = "user:aliaashahban@gmail.com"
   role        = "roles/iap.tunnelResourceAccessor"
@@ -233,5 +233,39 @@ resource "google_project_iam_member" "iap_role" {
   project = local.project_id
   member  = "user:aliaashahban@gmail.com"
   role    = "roles/iap.tunnelResourceAccessor"
+}*/
+# IAM Policy Binding for IAP Access
+resource "google_project_iam_binding" "iap_access" {
+  project = "<your-project-id>"
+
+  role    = "roles/iap.tunnelResourceAccessor"
+
+  members = [
+    "user:<your-email@example.com>",  # Replace with the user or service account
+  ]
+}
+
+# IAM Policy Binding for VM 1
+resource "google_compute_instance_iam_binding" "iap_vm1" {
+  instance = "<vm1-instance-name>"
+  project  = "<your-project-id>"
+  zone     = "<your-instance-zone>"
+
+  role    = "roles/iap.tunnelResourceAccessor"
+  members = [
+    "user:<your-email@example.com>",  # Replace with the user or service account
+  ]
+}
+
+# IAM Policy Binding for VM 2
+resource "google_compute_instance_iam_binding" "iap_vm2" {
+  instance = "<vm2-instance-name>"
+  project  = "<your-project-id>"
+  zone     = "<your-instance-zone>"
+
+  role    = "roles/iap.tunnelResourceAccessor"
+  members = [
+    "user:<your-email@example.com>",  # Replace with the user or service account
+  ]
 }
 # review
