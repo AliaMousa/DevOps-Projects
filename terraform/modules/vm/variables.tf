@@ -75,3 +75,16 @@ variable "vmdb_name" {
   default     = "app_instance"
   description = "description"
 }
+
+variable "count_num" {
+  type        = number
+  default     = 2
+  description = "number of instances"
+}
+
+
+variable "group_name" {
+  type        = string
+  default     = "instances_group"
+  description = "description"
+}

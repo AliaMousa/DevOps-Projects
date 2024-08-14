@@ -3,10 +3,10 @@ output "network" {
   description = "The VPC resource being created"
 }
 
-output "network_name" {
+/*output "network_name" {
   value       = google_compute_network.network.name
   description = "The name of the VPC being created"
-}
+}*/
 
 output "network_id" {
   value       = google_compute_network.network.id
@@ -36,5 +36,13 @@ output "firewall_rules" {
 output "router_name" {
   value       = google_compute_router.router
   description = "The name of the route being created"
+}
+
+output "network_name" {
+  value = google_compute_network.network.name
+}
+
+output "subnetwork_name" {
+  value = google_compute_subnetwork.subnetwork.name
 }
 

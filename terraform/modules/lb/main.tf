@@ -10,6 +10,7 @@ resource "google_compute_instance_group" "instance_group" {
   instances = var.instance_names
 }
 
+
 resource "google_compute_backend_service" "default" {
   name                  = var.backend_service_name
   port_name             = "http"
@@ -18,6 +19,9 @@ resource "google_compute_backend_service" "default" {
   health_checks         = [google_compute_http_health_check.default.self_link]
 
   backend {
+    #group = google_compute_instance_group.instance_group.instances
+    #group = var.instance_names
+    #instances = var.instance_names
     group = google_compute_instance_group.instance_group.self_link
   }
 }

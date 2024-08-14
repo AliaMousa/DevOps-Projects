@@ -57,8 +57,8 @@ resource "google_compute_instance" "db_instance" {
   }
 
   network_interface {
-    network = google_compute_network.network.name
-    subnetwork = google_compute_subnetwork.subnetwork.name
+    network = var.network_name
+    subnetwork = var.subnetwork_name
     access_config {
       nat_ip = null
         }
@@ -73,4 +73,17 @@ resource "google_compute_instance" "db_instance" {
     email  = google_service_account.default.email
     scopes = ["cloud-platform"]
  }
+}
+
+
+resource "google_compute_instance_group" "instance_group" {
+  provider = google
+  count    = var.count_num
+  name     = var.group_name
+  project  = var.project_id
+  zone     = var.zone
+  instances = [
+    google_compute_instance.app_instance.self_link,
+    google_compute_instance.db_instance.zone
+  ]
 }

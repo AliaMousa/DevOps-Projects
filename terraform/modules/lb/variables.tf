@@ -57,3 +57,9 @@ variable "forwarding_rule_name" {
   type    = string
   default = "global-forwarding-rule"
 }
+
+/*variable "instance_names" {
+  type        = list(string)
+  #default     = ""
+  description = "description"
+}*/
