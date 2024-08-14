@@ -14,23 +14,14 @@ resource "google_compute_instance" "app_instance" {
     }
   }
 
-  dynamic "network_interface" {
-    for_each = var.network_interface
-
-    content {
-      network            = var.network
-      subnetwork         = var.subnetwork
-      subnetwork_project = var.subnetwork_project
-      #network_ip         = length(var.static_ips) == 0 ? null : element(var.static_ips, count.index)
-
-      dynamic "access_config" {
-        for_each = var.access_config
-        content {
-          nat_ip = null
+  network_interface {
+    network = var.network_name
+    subnetwork = var.subnetwork_name
+    access_config {
+      nat_ip = null
         }
       }
-    }
-  }
+
 
   /*metadata = {
     ssh-keys = "path/to/ssh/public/key"
@@ -39,9 +30,14 @@ resource "google_compute_instance" "app_instance" {
   service_account {
     email  = google_service_account.default.email
     scopes = ["cloud-platform"]
-  }
+ }
 }
 
+resource "google_service_account" "default" {
+  project      = var.project_id
+  account_id   = "default-service-account"
+  display_name = "Default Service Account"
+}
 
 
 resource "google_compute_instance" "db_instance" {
@@ -60,23 +56,14 @@ resource "google_compute_instance" "db_instance" {
     }
   }
 
-  dynamic "network_interface" {
-    for_each = var.network_interface
-
-    content {
-      network            = var.network
-      subnetwork         = var.subnetwork
-      subnetwork_project = var.subnetwork_project
-      #network_ip         = length(var.static_ips) == 0 ? null : element(var.static_ips, count.index)
-
-      dynamic "access_config" {
-        for_each = var.access_config
-        content {
-          nat_ip = null
+  network_interface {
+    network = google_compute_network.network.name
+    subnetwork = google_compute_subnetwork.subnetwork.name
+    access_config {
+      nat_ip = null
         }
       }
-    }
-  }
+
 
   /*metadata = {
     ssh-keys = "path/to/ssh/public/key"
@@ -85,5 +72,5 @@ resource "google_compute_instance" "db_instance" {
   service_account {
     email  = google_service_account.default.email
     scopes = ["cloud-platform"]
-  }
+ }
 }

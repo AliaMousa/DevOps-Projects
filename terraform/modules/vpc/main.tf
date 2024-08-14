@@ -1,7 +1,7 @@
 
-/******************************************
-	VPC configuration
- *****************************************/
+#/******************************************
+#	VPC configuration
+ #*****************************************/
 resource "google_compute_network" "network" {
   name                    = var.network_name
   auto_create_subnetworks = var.auto_create_subnetworks
@@ -30,14 +30,11 @@ resource "google_compute_firewall" "rules" {
   #source_tags             = each.value.source_tags
   #source_service_accounts = each.value.source_service_accounts
   target_tags = var.target_tags
-
-  dynamic "allow" {
-    #for_each = lookup(each.value, "allow", [])
-    content {
-      protocol = ssh
-      ports    = 22
+  
+    allow {
+      protocol = "tcp"
+      ports    = ["22"]
     }
-  }
 }
 
 resource "google_compute_router" "router" {
@@ -52,8 +49,8 @@ resource "google_compute_router" "router" {
 resource "google_compute_router_nat" "nat_router" {
   name   = var.router_nat
   router = google_compute_router.router.name
-  region = local.region
-  #source_subnetwork_ip_ranges_to_nat  = "LIST_OF_SUBNETWORKS"
+  region = var.region
+  source_subnetwork_ip_ranges_to_nat  = "LIST_OF_SUBNETWORKS"
   enable_dynamic_port_allocation      = var.port_allocation
   enable_endpoint_independent_mapping = var.endpoint_mapping
 }
