@@ -50,6 +50,7 @@ resource "google_compute_router_nat" "nat_router" {
   name   = var.router_nat
   router = google_compute_router.router.name
   region = var.region
+  # search for values for the next directive
   source_subnetwork_ip_ranges_to_nat  = "LIST_OF_SUBNETWORKS"
   enable_dynamic_port_allocation      = var.port_allocation
   enable_endpoint_independent_mapping = var.endpoint_mapping
