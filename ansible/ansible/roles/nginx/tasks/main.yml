@@ -7,3 +7,5 @@
   systemd:
     name: nginx
     state: started
+
+

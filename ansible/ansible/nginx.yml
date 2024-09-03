@@ -1,0 +1,10 @@
+---
+- name: install nginx
+  hosts: test
+  become: true
+  remote_user: ansible
+    #ignore_errors: yes
+
+  roles: 
+    #   - nginx
+    - docker

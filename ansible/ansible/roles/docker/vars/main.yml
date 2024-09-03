@@ -15,8 +15,9 @@ docker_pkg:
 
 docker_users:
   - ubuntu
+    #- ansible
 
 docker_version: "5:27.2.0-1~ubuntu.24.04~noble"
-docker_compose_version: "1.29.2-6ubuntu1"
-docker_compose_url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-Linux-x86_64"
-#"1.29.2
+docker_compose_version: "2.29.2-1~ubuntu.24.04~noble"
+#docker_compose_url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-Linux-x86_64"
+docker_compose_url: "http://in.archive.ubuntu.com/ubuntu noble/universe amd64 Packages"
