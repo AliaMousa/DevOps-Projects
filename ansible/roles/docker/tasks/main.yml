@@ -42,7 +42,7 @@
     state: latest
     update_cache: yes
   tags: docker
-  handlers: dockerservice
+  notify: dockerservice
 
 # Step5: Add user to docker group
 - name: adding users to group docker
@@ -50,7 +50,7 @@
     name: '{{ item }}'
     groups: docker
     append: yes
-    loop: '{{ docker_users }}'
+  loop: '{{ docker_users }}'
 
 #To check if Docker Compose is already installed before proceeding with the installation,
 - name: check docker installation; register the resualt
