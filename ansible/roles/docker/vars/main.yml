@@ -14,9 +14,9 @@ docker_pkg:
   - containerd.io
 
 docker_users:
-  - alia
-  - ansible
+  - ubuntu
 
-docker_version: "5:20.10.7~3-0~ubuntu-focal"
-docker_compose_version: "1.29.2"
+docker_version: "5:27.2.0-1~ubuntu.24.04~noble"
+docker_compose_version: "1.29.2-6ubuntu1"
 docker_compose_url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-Linux-x86_64"
+#"1.29.2

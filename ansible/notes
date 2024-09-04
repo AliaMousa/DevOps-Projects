@@ -1,0 +1,3 @@
+##ansible credentials for the user added in the inventory file near the ip 
+ip ansible_user=ubuntu ansible_password=ubuntu
+##also in the ansible.cfg or the playbook file weshould define remote_user
