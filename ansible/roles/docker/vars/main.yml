@@ -10,13 +10,14 @@ docker_dep:
 
 docker_pkg:
   - docker-ce={{ docker_version }}
+  - docker-ce=5:20.10.24~3-0~debian-bullseye
   - docker-ce-cli={{ docker_version }}
   - containerd.io
 
 docker_users:
   - ubuntu
 
-docker_version: "5:27.2.0-1~ubuntu.24.04~noble"
+docker_version: "5:20.10.24~3-0~debian-bullseye"
 docker_compose_version: "1.29.2-6ubuntu1"
 docker_compose_url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-Linux-x86_64"
 #"1.29.2

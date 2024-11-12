@@ -1,0 +1,28 @@
+plugin: gcp_compute
+projects:
+  - your-project-id
+auth_kind: serviceaccount
+service_account_file: ~/creds.json
+
+keyed_groups:
+  - key: labels
+    prefix: label
+  #- key: zone
+   # prefix: zone
+groups:
+  #remote: "'db' in (labels|list)"
+#groups:
+ # web_servers:
+  #  filters:
+   #   - "name: 'app-instance'"
+#compose:
+  #ansible_host: networkInterfaces[0].accessConfigs[0].natIP
+#hostnames:
+ # - name
+#groups:
+  # add hosts to the "private_only" group if the host doesn't have a public IP associated to it
+ # private_only: "public_ip_address is not defined"
+  #db-servers: "'db' in labels"
+  #app-servers: "'app' in labels"
+     
+

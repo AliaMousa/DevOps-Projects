@@ -1,0 +1,12 @@
+plugin: gcp_compute
+projects:
+          - [your_gcp_account]
+auth_kind: serviceaccount
+service_account_file: /opt/ansible/inventory/service-account.json
+keyed_groups:
+  - key: labels
+    prefix: label
+  - key: zone
+    prefix: zone
+groups:
+  remote: "'citrix' in (labels|list)"
