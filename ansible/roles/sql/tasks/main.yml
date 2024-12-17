@@ -1,0 +1,21 @@
+---
+- name: download the MySQL APT repo package
+  shell: "wget https://dev.mysql.com/get/mysql-apt-config_0.8.17-1_all.deb -O /home/alia/mysql-apt-config_0.8.17-1_all.deb"
+ #register: image_download
+
+- name: install the MySQL APT repo package
+  ansible.builtin.apt:
+    deb: "/home/alia/mysql-apt-config_0.8.17-1_all.deb"
+  become: true
+
+- name: update the apt cache after adding MySQL repo
+  ansible.builtin.apt:
+    update_cache: yes
+  become: true
+
+- name: install MySQL server
+  ansible.builtin.apt:
+    name: mysql-server
+    state: present
+  become: true
+  notify: startSQL

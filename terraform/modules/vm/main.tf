@@ -1,89 +1,56 @@
-resource "google_compute_instance" "app_instance" {
-  provider            = google
-  #count               = var.num_instances
-  #name                = var.add_hostname_suffix ? format("%s%s%s", var.hostname, var.hostname_suffix_separator, format("%03d", count.index + 1)) : var.hostname
-  name = var.vm_name
-  project             = var.project_id
+resource "google_service_account" "sa1" {
+    account_id = var.account_id
+    display_name = "Custom SA for VM Instance"
+    project = "your_project_id"
+}
+
+resource "google_compute_instance" "instances" {
+  allow_stopping_for_update = true
+  count               = length(var.vm_name)
+  name                = var.vm_name[count.index]
+  project             = var.project
   zone                = var.zone
-  deletion_protection = var.deletion_protection
-  machine_type        = "e2-micro"
+  deletion_protection = false #var.deletion_protection
+  machine_type        = var.machine_type
 
   boot_disk {
     initialize_params {
       image = "debian-cloud/debian-11"
     }
-  }
+   }
 
   network_interface {
-    network = var.network_name
-    subnetwork = var.subnetwork_name
-    access_config {
-      nat_ip = null
-        }
-      }
-
-
-  /*metadata = {
-    ssh-keys = "path/to/ssh/public/key"
-  }*/
-
-  service_account {
-    email  = google_service_account.default.email
-    scopes = ["cloud-platform"]
- }
-}
-
-resource "google_service_account" "default" {
-  project      = var.project_id
-  account_id   = "default-service-account"
-  display_name = "Default Service Account"
-}
-
-
-resource "google_compute_instance" "db_instance" {
-  provider            = google
-  #count               = var.num_instances
-  #name                = var.add_hostname_suffix ? format("%s%s%s", var.hostname, var.hostname_suffix_separator, format("%03d", count.index + 1)) : var.hostname
-  name = var.vmdb_name
-  project             = var.project_id
-  zone                = var.zone
-  deletion_protection = var.deletion_protection
-  machine_type        = "e2-micro"
-
-  boot_disk {
-    initialize_params {
-      image = "debian-cloud/debian-11"
+    network = var.network
+    subnetwork = var.subnetwork
     }
-  }
-
-  network_interface {
-    network = var.network_name
-    subnetwork = var.subnetwork_name
-    access_config {
-      nat_ip = null
-        }
-      }
-
-
-  /*metadata = {
-    ssh-keys = "path/to/ssh/public/key"
-  }*/
+  labels = var.vm_labels[count.index]
+  tags = ["app"]
 
   service_account {
-    email  = google_service_account.default.email
+    email  = google_service_account.sa1.email
     scopes = ["cloud-platform"]
- }
+  }
+  metadata = {
+    ssh-keys = "your-ssh-key"
+  }
+
+  #provisioner "local-exec" {
+   # command = "ansible-playbook /home/alia/GitHub_project/gcp_project/ansible/nginx.yml -i '${google_compute_instance.instances[0].network_interface[0].network_ip},' --user=alia --private-key=~/.ssh/gce_service_account -e 'ansible_ssh_common_args=\"-o ProxyCommand=\\\"gcloud compute ssh ${self.name} --project ${var.project} --zone ${var.zone} --tunnel-through-iap\\\"\"' --timeout=60"
+#}
+
 }
 
-
-resource "google_compute_instance_group" "instance_group" {
-  provider = google
-  count    = var.count_num
-  name     = var.group_name
-  project  = var.project_id
-  zone     = var.zone
-  instances = [
-    google_compute_instance.app_instance.self_link,
-    google_compute_instance.db_instance.zone
+resource "google_compute_instance_group" "app-instance-group" {
+  name        = var.group_name
+  description = "Terraform test instance group"
+  project             = var.project
+  #project = "your_project_id"
+  instances =  [
+    google_compute_instance.instances[0].self_link
+    #google_compute_instance.instances[1].self_link
+    #"google_compute_instance.instances.${vm_name[count.index[0]]}.vm_id" 
+   
   ]
+
+  #region = "us-east1"
 }

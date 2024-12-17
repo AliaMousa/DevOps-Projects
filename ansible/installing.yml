@@ -1,0 +1,17 @@
+---
+- name: Manage new instances
+  hosts: label_machine_app
+  become_method: sudo
+  connection: ssh
+  become: true
+  roles: 
+    - nginx
+    - docker
+    
+- name: Manage new instances
+  hosts: label_machine_db
+  become_method: sudo
+  connection: ssh
+  become: true
+  roles: 
+    - sql
